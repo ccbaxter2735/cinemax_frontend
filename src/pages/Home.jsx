@@ -45,7 +45,7 @@ export default function Home() {
 
       <main className="p-6">
         <h2 className="text-xl font-semibold mb-4">Bienvenue sur CINEMAX</h2>
-        <p className="mb-4">Voici la liste des films disponibles sur notre site :</p>
+        <p className="mb-4">Voici la liste des films à découvrir :</p>
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 text-red-700 rounded">{error}</div>
