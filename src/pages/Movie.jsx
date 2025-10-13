@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function Movie({ movie }) {
   const poster = movie.poster_url || movie.poster || "";
+  const illustration = movie.illustration_url || movie.illustration || "";
   const title = movie.title_fr || movie.title_original || "Titre inconnu";
   const release = movie.release_date ? new Date(movie.release_date).getFullYear() : "";
 

@@ -40,8 +40,8 @@ export default function MovieMain({ movie, onLike, onRate, comments = [], commen
       }).format(new Date(release_date))
     : "Date inconnue";
 
-  const posterSrc = poster_url || poster || "/images/poster-placeholder.png";
-  const illuSrc = illustration || "/images/illustration-placeholder.jpg";
+  const posterSrc = poster_url || poster;
+  const illuSrc = illustration;
 
   const durationText =
     duration_display ||
@@ -144,7 +144,7 @@ export default function MovieMain({ movie, onLike, onRate, comments = [], commen
             {cast.map((c, idx) => (
               <li key={idx} className="bg-white rounded-lg p-3 shadow-sm flex flex-col items-center text-center">
                 <div className="w-24 h-24 mb-2 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <img src={(c.actor && (c.actor.photo || c.actor.avatar)) || "/images/actor-placeholder.png"} alt={c.actor ? c.actor.name : "Acteur"} className="w-full h-full object-cover" loading="lazy" />
+                  <img src={(c.actor && (c.actor.photo || c.actor.avatar))} alt={c.actor ? c.actor.name : "Acteur"} className="w-full h-full object-cover" loading="lazy" />
                 </div>
                 <div className="text-sm font-medium">{c.actor ? c.actor.name : "Acteur inconnu"}</div>
                 {c.role_name && <div className="text-xs text-gray-500">{c.role_name}</div>}
