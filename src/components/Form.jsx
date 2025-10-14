@@ -2,57 +2,117 @@ import { useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
-import "../style/Form.css"
+import "../style/Form.css";
 
-function Form({route, method}) {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+function Form({ route, method }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(method === "login");
+  const navigate = useNavigate();
 
-    const name = method === "login" ? "Connexion" : "Inscription";
+  const name = isLogin ? "Connexion" : "Inscription";
+  const currentRoute = isLogin ? "/api/token/" : "/api/user/register/";
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-    const handleSubmit = async (e) => {
-        setLoading(true);
-        e.preventDefault();
-        try {
-            const response = await api.post(route, { username, password });
-            if (method === "login") {
-                localStorage.setItem(ACCESS_TOKEN, response.data.access);
-                localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
-                navigate("/");
-            } else {
-                navigate("/login");
-            }
-        } catch (error) {
-            console.log(error);
-            alert(error.response.data.detail);
-        } finally {
-            setLoading(false);
-        }
+    try {
+      const response = await api.post(currentRoute, { username, password });
+
+      if (isLogin) {
+        localStorage.setItem(ACCESS_TOKEN, response.data.access);
+        localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
+        localStorage.setItem("username", username);
+        navigate("/");
+      } else {
+        alert("Compte créé avec succès ! Connecte-toi maintenant.");
+        setIsLogin(true);
+        setUsername("");
+        setPassword("");
+      }
+    } catch (error) {
+      console.error(error);
+      alert(
+        error.response?.data?.detail ||
+          (isLogin
+            ? "Erreur de connexion. Vérifie tes identifiants."
+            : "Erreur lors de l'inscription.")
+      );
+      if (isLogin) navigate("/login");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return <form onSubmit={handleSubmit} className="form-container">
-        <h1> {name}</h1>
-        <input 
-            className="form-input" 
-            type="text" 
-            placeholder="Nom d'utilisateur" 
-            value={username} 
-            onChange={(e) => setUsername(e.target.value)} />
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setUsername("");
+    setPassword("");
+  };
 
-        <input 
-            className="form-input" 
-            type="password" 
-            placeholder="Mot de passe" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} />
+  return (
+    <div className="auth-container">
+      <form onSubmit={handleSubmit} className="auth-card">
+        <h1 className="auth-title">{name}</h1>
 
-        <button className="form-button" type="submit">{name}</button>
-    </form>
+        <div className="auth-fields">
+          <input
+            type="text"
+            placeholder="Nom d'utilisateur"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="auth-input"
+            required
+          />
+
+          <input
+            type="password"
+            placeholder="Mot de passe"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="auth-input"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="auth-button"
+        >
+          {loading ? "Chargement..." : name}
+        </button>
+
+        <div className="auth-toggle">
+          {isLogin ? (
+            <>
+              Pas encore de compte ?{" "}
+              <button
+                type="button"
+                onClick={toggleMode}
+                className="auth-link"
+              >
+                S’inscrire
+              </button>
+            </>
+          ) : (
+            <>
+              Déjà un compte ?{" "}
+              <button
+                type="button"
+                onClick={toggleMode}
+                className="auth-link"
+              >
+                Se connecter
+              </button>
+            </>
+          )}
+        </div>
+      </form>
+    </div>
+  );
 }
 
-export default Form
-
-
+export default Form;
