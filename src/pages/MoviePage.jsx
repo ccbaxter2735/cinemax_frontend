@@ -74,6 +74,7 @@ export default function MoviePage() {
     try {
       await api.post(`/api/movies/${movieId}/rate/`, { score: rating });
       await fetchMovie();
+      
     } catch (err) {
       console.error(err);
     }

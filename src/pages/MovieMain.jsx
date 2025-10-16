@@ -34,10 +34,10 @@ export default function MovieMain({ movie, onLike, onRate, comments = [], commen
 
   const displayDate = release_date
     ? new Intl.DateTimeFormat("fr-FR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(new Date(release_date))
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(new Date(release_date))
     : "Date inconnue";
 
   const posterSrc = poster_url || poster;
@@ -105,18 +105,30 @@ export default function MovieMain({ movie, onLike, onRate, comments = [], commen
               </button>
 
               <div className="flex items-center gap-2">
-                <label className="text-sm">Noter :</label>
-                <select
-                  aria-label="Noter le film"
-                  onChange={(e) => onRate && onRate(id, Number(e.target.value))}
-                  defaultValue=""
-                  className="px-2 py-1 border rounded"
-                >
-                  <option value="" disabled>--</option>
-                  {[...Array(10)].map((_, i) => (
-                    <option key={i + 1} value={i + 1}>{i + 1}</option>
-                  ))}
-                </select>
+                {movie.user_rating ? (
+                  // ✅ Si l'utilisateur a déjà noté le film
+                  <div className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-semibold shadow-sm border border-green-300">
+                    Votre note : {movie.user_rating}/10
+                  </div>
+                ) : (
+                  <>
+                    <label htmlFor="rating-select" className="text-sm">Noter :</label>
+                    <select
+                      id="rating-select"
+                      aria-label="Noter le film"
+                      onChange={(e) => onRate && onRate(movie.id, Number(e.target.value))}
+                      defaultValue=""
+                      className="px-2 py-1 border rounded"
+                    >
+                      <option value="" disabled>--</option>
+                      {[...Array(10)].map((_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          {i + 1}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                )}
               </div>
             </div>
 
