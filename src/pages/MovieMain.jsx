@@ -107,7 +107,7 @@ export default function MovieMain({ movie, onLike, onRate, comments = [], commen
               <div className="flex items-center gap-2">
                 {movie.user_rating ? (
                   // ✅ Si l'utilisateur a déjà noté le film
-                  <div className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-semibold shadow-sm border border-green-300">
+                  <div className="px-3 py-1  flex items-center justify-center text-white font-bold bg-green-500 rounded-full mr-3">
                     Votre note : {movie.user_rating}/10
                   </div>
                 ) : (
@@ -167,7 +167,7 @@ export default function MovieMain({ movie, onLike, onRate, comments = [], commen
       </section>
 
       {/* Comments section */}
-      <CommentsSection comments={comments} loading={commentsLoading} onAddComment={onAddComment} />
+      <CommentsSection comments={comments} loading={commentsLoading} onAddComment={onAddComment} movie={movie} />
 
       <footer className="mt-10 text-sm text-gray-500">Données mises à jour automatiquement si disponibles.</footer>
     </main>
@@ -175,7 +175,7 @@ export default function MovieMain({ movie, onLike, onRate, comments = [], commen
 }
 
 
-function CommentsSection({ comments = [], loading = false, onAddComment }) {
+function CommentsSection({ comments = [], loading = false, onAddComment, movie }) {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -210,9 +210,19 @@ function CommentsSection({ comments = [], loading = false, onAddComment }) {
       <h2 className="text-xl font-semibold mb-4">Commentaires</h2>
 
       <form onSubmit={submit} className="mb-4">
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="Écrire un commentaire..." className="w-full p-3 border rounded resize-y" />
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={3}
+          placeholder="Écrire un commentaire..."
+          className="w-full p-3 border rounded resize-y"
+        />
         <div className="mt-2 flex items-center gap-3">
-          <button type="submit" disabled={submitting || !onAddComment} className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-60">
+          <button
+            type="submit"
+            disabled={submitting || !onAddComment}
+            className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-60"
+          >
             {submitting ? "Envoi..." : "Publier"}
           </button>
           {error && <div className="text-red-600 text-sm">{error}</div>}
@@ -226,12 +236,17 @@ function CommentsSection({ comments = [], loading = false, onAddComment }) {
       ) : (
         <ul className="space-y-4">
           {comments.map((c) => (
-            <li key={c.id} className="bg-white p-3 rounded shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-medium">{c.author_username || "Anonyme"}</div>
-                <div className="text-xs text-gray-500">{new Date(c.created_at).toLocaleString()}</div>
+            <li key={c.id} className="bg-white p-3 rounded shadow-sm flex">
+              {c.rating_score && (
+                <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-white font-bold bg-green-500 rounded-full mr-3">
+                  {c.rating_score}
+                </div>
+              )}
+              <div className="flex-1">
+                <div className="text-lg font-bold">{c.author_username}</div>
+                <div className="mt-1 text-gray-800">{c.text}</div>
               </div>
-              <div className="mt-2 text-gray-800">{c.text}</div>
+              <div className="text-xs text-gray-500 ml-3">{new Date(c.created_at).toLocaleString()}</div>
             </li>
           ))}
         </ul>
@@ -239,3 +254,4 @@ function CommentsSection({ comments = [], loading = false, onAddComment }) {
     </section>
   );
 }
+
