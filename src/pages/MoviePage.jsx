@@ -14,6 +14,8 @@ export default function MoviePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [actors, setActors] = useState([]);
+
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(true);
 
@@ -21,6 +23,7 @@ export default function MoviePage() {
     if (!id) return;
     fetchMovie();
     fetchComments();
+    fetchActors();
     fetchName();
   }, [id]);
 
@@ -58,6 +61,15 @@ export default function MoviePage() {
       setComments([]);
     } finally {
       setCommentsLoading(false);
+    }
+  }
+
+  async function fetchActors() {
+    try {
+      const res = await api.get(`/api/movies/${id}/actors/`);
+      setActors(res.data);
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -113,6 +125,7 @@ export default function MoviePage() {
             onLike={handleLike}
             onRate={handleRate}
             comments={comments}
+            actors={actors}
             commentsLoading={commentsLoading}
             onAddComment={handleAddComment}
           />

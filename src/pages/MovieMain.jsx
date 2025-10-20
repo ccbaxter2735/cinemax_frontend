@@ -10,7 +10,7 @@ import React, { useState } from "react";
  *  - commentsLoading: boolean (optional)
  *  - onAddComment(text): async function to post a comment (optional)
  */
-export default function MovieMain({ movie, onLike, onRate, comments = [], commentsLoading = false, onAddComment }) {
+export default function MovieMain({ movie, onLike, onRate, actors = [], comments = [], commentsLoading = false, onAddComment }) {
   if (!movie) return null;
 
   const {
@@ -147,24 +147,9 @@ export default function MovieMain({ movie, onLike, onRate, comments = [], commen
         </div>
       </section>
 
-      <section className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Distribution</h2>
-        {cast.length === 0 ? (
-          <p className="text-gray-600">Pas d'acteurs listés pour ce film.</p>
-        ) : (
-          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {cast.map((c, idx) => (
-              <li key={idx} className="bg-white rounded-lg p-3 shadow-sm flex flex-col items-center text-center">
-                <div className="w-24 h-24 mb-2 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <img src={(c.actor && (c.actor.photo || c.actor.avatar))} alt={c.actor ? c.actor.name : "Acteur"} className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <div className="text-sm font-medium">{c.actor ? c.actor.name : "Acteur inconnu"}</div>
-                {c.role_name && <div className="text-xs text-gray-500">{c.role_name}</div>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      
+      {/* list actor section */}
+      <ActorsSection actors={actors} />
 
       {/* Comments section */}
       <CommentsSection comments={comments} loading={commentsLoading} onAddComment={onAddComment} movie={movie} />
@@ -173,6 +158,59 @@ export default function MovieMain({ movie, onLike, onRate, comments = [], commen
     </main>
   );
 }
+
+function ActorsSection({ actors = [] }) {
+  if (!Array.isArray(actors) || actors.length === 0) {
+    return (
+      <section className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Acteurs</h2>
+        <p className="text-gray-600">Pas d'acteurs listés pour ce film.</p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-xl font-semibold mb-4">Acteurs</h2>
+
+      {/* conteneur qui permet le défilement horizontal */}
+      <div className="overflow-x-auto">
+        <div className="flex gap-4 pb-3 px-1">
+          {actors.map((item, idx) => {
+            const actor = item?.actor || {};
+            const name = actor.full_name || `${actor.first_name || ""} ${actor.last_name || ""}`.trim() || "Acteur";
+            const img = actor.photo || actor.avatar || "/images/actor-placeholder.png";
+            const role = item?.role_name || "";
+
+            return (
+              <div
+                key={item.id ?? actor.id ?? idx}
+                className="flex-shrink-0 w-40 sm:w-44 md:w-48 bg-white rounded-lg shadow-sm overflow-hidden"
+                aria-label={`${name} — ${role}`}
+              >
+                <div className="w-full h-40 md:h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={img}
+                    alt={name}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.src = "/images/actor-placeholder.png"; }}
+                  />
+                </div>
+
+                <div className="p-3 text-left">
+                  <div className="text-sm font-semibold text-gray-900 truncate">{name}</div>
+                  {role && <div className="text-xs text-gray-500 mt-1 truncate">{role}</div>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 
 function CommentsSection({ comments = [], loading = false, onAddComment, movie }) {
