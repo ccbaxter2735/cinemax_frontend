@@ -1,0 +1,140 @@
+// src/pages/Actors.jsx
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import api from "../api";
+import Header from "./Header";
+import Movie from "./Movie";
+
+export default function ActorsPage() {
+  const { id } = useParams();
+  const [user, setUser] = useState(null);
+  const [actor, setActor] = useState(null);
+  const [movies, setMovies] = useState([]);
+  const [loadingActor, setLoadingActor] = useState(true);
+  const [loadingMovies, setLoadingMovies] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    async function fetchActor() {
+      setLoadingActor(true);
+      try {
+        const res = await api.get(`/api/movies/${id}/actors/`);
+        // console.log("fetchActor res:", res.data);
+
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          // On prend le premier acteur de la liste
+          const first = res.data[0];
+          const actorObj = first.actor || first; // selon ta structure
+          setActor(actorObj);
+        } else {
+          setActor(null);
+          setError("Aucun acteur trouvé pour ce film.");
+        }
+      } catch (err) {
+        console.error("fetchActor error", err);
+        setError("Impossible de charger l'acteur.");
+      } finally {
+        setLoadingActor(false);
+      }
+    }
+
+    async function fetchMovies() {
+      setLoadingMovies(true);
+      try {
+        const res = await api.get(`/api/actors/${id}/movies/`);
+        // console.log("fetchMovies res:", res.data);
+        setMovies(Array.isArray(res.data) ? res.data : res.data.results || []);
+      } catch (err) {
+        console.warn("fetchMovies failed, trying fallback", err);
+        try {
+          const res2 = await api.get(`/api/movies/?actor=${id}`);
+          setMovies(Array.isArray(res2.data) ? res2.data : res2.data.results || []);
+        } catch (err2) {
+          console.error("fetchMovies fallback failed", err2);
+          setMovies([]);
+        }
+      } finally {
+        setLoadingMovies(false);
+      }
+    }
+
+    async function fetchName() {
+      try {
+        const res = await api.get("/api/user/me/");
+        setUser(res.data);
+      } catch (err) {
+        setUser(null);
+      }
+    }
+
+    fetchActor();
+    fetchMovies();
+    fetchName();
+  }, [id]);
+
+  if (loadingActor) return <div className="p-6">Chargement de l'acteur…</div>;
+  if (error) return <div className="p-6 text-red-600">{error}</div>;
+  if (!actor) return <div className="p-6">Acteur introuvable.</div>;
+
+  const full_name = actor.full_name || `${actor.first_name || ""} ${actor.last_name || ""}`.trim();
+  const birth_date = actor.birth_date || actor?.dob || null;
+  let photo = actor.photo || actor.avatar || null;
+  if (photo && typeof photo === "object" && photo.url) photo = photo.url;
+
+  return (
+    <div>
+      <Header username={user?.username} />
+      <main className="max-w-4xl mx-auto p-6">
+        <div className="flex flex-col md:flex-row gap-6 items-start bg-white rounded-lg shadow p-6">
+          <div className="w-full md:w-44 flex-shrink-0">
+            <div className="w-full h-56 md:h-64 bg-gray-100 rounded-lg overflow-hidden">
+              <img
+                src={photo || "/images/actor-placeholder.png"}
+                alt={full_name || "Acteur"}
+                className="w-full h-full object-cover"
+                onError={(e) => { e.currentTarget.src = "/images/actor-placeholder.png"; }}
+              />
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <h1 className="text-2xl font-extrabold">{full_name || "Acteur"}</h1>
+            {birth_date && <div className="text-sm text-gray-600 mt-1">Né(e) le {new Date(birth_date).toLocaleDateString("fr-FR")}</div>}
+
+            {actor.biography && (
+              <div className="mt-4 text-gray-800 prose">
+                <p>{actor.biography}</p>
+              </div>
+            )}
+
+            <div className="mt-6 flex gap-3">
+              <Link to="/" className="px-4 py-2 border rounded hover:shadow-sm">Retour</Link>
+            </div>
+          </div>
+        </div>
+
+        <section className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">Films avec {full_name || "cet acteur"}</h2>
+
+          {loadingMovies ? (
+            <div>Chargement des films…</div>
+          ) : movies.length === 0 ? (
+            <div className="text-gray-600">Aucun film trouvé pour cet acteur.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="flex gap-4 pb-3 px-1">
+                {movies.map((m) => (
+                  <article key={m.id} className="flex-shrink-0 w-40 bg-white rounded-lg shadow-sm overflow-hidden">
+                    <Movie movie={m} />
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
+}

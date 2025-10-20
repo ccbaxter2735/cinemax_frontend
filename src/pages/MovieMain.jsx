@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import ActorsDetails from "./Actors";
+import { Link } from "react-router-dom";
 
 /**
  * MovieMain.jsx (avec section commentaires)
@@ -160,7 +162,7 @@ export default function MovieMain({ movie, onLike, onRate, actors = [], comments
 }
 
 function ActorsSection({ actors = [] }) {
-  if (!Array.isArray(actors) || actors.length === 0) {
+  if (!actors || actors.length === 0) {
     return (
       <section className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Acteurs</h2>
@@ -173,43 +175,76 @@ function ActorsSection({ actors = [] }) {
     <section className="mt-8">
       <h2 className="text-xl font-semibold mb-4">Acteurs</h2>
 
-      {/* conteneur qui permet le défilement horizontal */}
       <div className="overflow-x-auto">
-        <div className="flex gap-4 pb-3 px-1">
-          {actors.map((item, idx) => {
-            const actor = item?.actor || {};
-            const name = actor.full_name || `${actor.first_name || ""} ${actor.last_name || ""}`.trim() || "Acteur";
-            const img = actor.photo || actor.avatar || "/images/actor-placeholder.png";
-            const role = item?.role_name || "";
-
-            return (
-              <div
-                key={item.id ?? actor.id ?? idx}
-                className="flex-shrink-0 w-40 sm:w-44 md:w-48 bg-white rounded-lg shadow-sm overflow-hidden"
-                aria-label={`${name} — ${role}`}
-              >
-                <div className="w-full h-40 md:h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
-                  <img
-                    src={img}
-                    alt={name}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.src = "/images/actor-placeholder.png"; }}
-                  />
-                </div>
-
-                <div className="p-3 text-left">
-                  <div className="text-sm font-semibold text-gray-900 truncate">{name}</div>
-                  {role && <div className="text-xs text-gray-500 mt-1 truncate">{role}</div>}
-                </div>
-              </div>
-            );
-          })}
+        <div className="flex gap-4 pb-3">
+          {actors.map((actorItem, idx) => (
+            <ActorCard key={actorItem.id ?? actorItem.actor?.id ?? idx} castItem={actorItem} />
+          ))}
         </div>
       </div>
     </section>
   );
 }
+
+function ActorCard({ castItem }) {
+  // si castItem est null/undefined -> fallback
+  if (!castItem) return null;
+
+  // support multiple shapes
+  const maybeActor = castItem.actor ? castItem.actor : castItem;
+  const roleFromCasting = castItem.role_name || castItem.role || "";
+
+  // some APIs return photo as object, sometimes as url string
+  let photo = maybeActor?.photo || maybeActor?.avatar || null;
+  if (photo && typeof photo === "object" && photo.url) {
+    photo = photo.url;
+  }
+
+  const name =
+    maybeActor?.full_name ||
+    [maybeActor?.first_name, maybeActor?.last_name].filter(Boolean).join(" ").trim() ||
+    maybeActor?.name ||
+    "Acteur";
+
+  const id = maybeActor?.id ?? castItem?.actor?.id ?? null;
+  const to = id ? `/actors/${id}` : null;
+
+  // debug (remove or comment in production)
+  // console.log("ActorCard castItem shape:", castItem, "=> actor:", maybeActor);
+
+  const img = photo || "/images/actor-placeholder.png";
+
+  const CardContent = (
+    <div
+      className="flex-shrink-0 w-40 bg-white rounded-lg shadow-sm p-0 text-center hover:shadow-md transition"
+      aria-label={`${name}${roleFromCasting ? ` — ${roleFromCasting}` : ""}`}
+    >
+      <div className="w-full h-40 md:h-48 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-lg">
+        <img
+          src={img}
+          alt={name}
+          loading="lazy"
+          className="w-full h-full object-cover"
+          onError={(e) => { e.currentTarget.src = "/images/actor-placeholder.png"; }}
+        />
+      </div>
+
+      <div className="p-3 text-left">
+        <div className="text-sm font-semibold text-gray-900 truncate">{name}</div>
+        {roleFromCasting && <div className="text-xs text-gray-500 mt-1 truncate">{roleFromCasting}</div>}
+      </div>
+    </div>
+  );
+
+  return to ? (
+    <Link to={to} aria-label={`Voir la fiche de ${name}`}>
+      {CardContent}
+    </Link>
+  ) : (
+    CardContent
+  );
+}
+
 
 
 

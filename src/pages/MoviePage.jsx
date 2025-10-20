@@ -41,7 +41,7 @@ export default function MoviePage() {
     setLoading(true);
     try {
       const res = await api.get(`/api/movies/${id}/`);
-      console.log(res.data.poster, res.data.poster_url);
+      // console.log(res.data.poster, res.data.poster_url);
       setMovie(res.data);
     } catch (err) {
       console.error(err);

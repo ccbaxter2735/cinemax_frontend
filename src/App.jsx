@@ -5,6 +5,7 @@ import Register from "./pages/Register"
 // import Movie from "./pages/Movie"
 // import Actor from "./pages/Actor"
 import Home from "./pages/Home"
+import ActorsPage from "./pages/Actors";
 import MoviePage from "./pages/MoviePage"
 import ProtectedRoute from "./components/ProtectedRoute"
 import NotFound from "./pages/NotFound"
@@ -34,6 +35,7 @@ function App() {
         <Route path="/movies/:id" element={<MoviePage />} />
         {/* <Route path="/movies/" element={<Movie />} />
         <Route path="/actors/" element={<Actor />} /> */}
+        <Route path="/actors/:id" element={<ActorsPage />} />
         <Route path="*" element={<NotFound />} />
 
       </Routes>
