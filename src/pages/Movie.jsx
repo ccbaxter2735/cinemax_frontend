@@ -8,9 +8,15 @@ export default function Movie({ movie }) {
   const title = movie.title_fr || movie.title_original || "Titre inconnu";
   const release = movie.release_date ? new Date(movie.release_date).getFullYear() : "";
 
+  const movieId = movie?.id ?? movie?.pk ?? movie?.movie_id ?? movie?.movie?.id;
+
+  const Wrapper = ({ children }) =>
+    movieId ? <Link to={`/movies/${movieId}`} className="block w-full">{children}</Link>
+            : <div className="block w-full cursor-default">{children}</div>;
+
   return (
     <article className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition duration-200 w-full">
-      <Link to={`/movies/${movie.id}`} className="block w-full">
+      <Link to={`/movies/${movieId}`} className="block w-full">
         <div className="relative bg-gray-100 w-full overflow-hidden">
           {poster ? (
             <img
