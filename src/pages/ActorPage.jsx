@@ -116,21 +116,8 @@ export default function ActorPage() {
             <div className="overflow-x-auto">
               <div className="flex gap-4 pb-3 px-1">
                 {movies.map((m) => (
-                  <article key={m.id} className="flex-shrink-0 w-40 bg-white rounded-lg shadow-sm overflow-hidden">
-                    <Link to={`/movies/${m.id}`}>
-                      <div className="w-full h-56 bg-gray-100">
-                        <img
-                          src={m.poster || m.poster_url || "/images/poster-placeholder.png"}
-                          alt={m.title_fr || m.title_original}
-                          className="w-full h-full object-cover"
-                          onError={(e) => { e.currentTarget.src = "/images/poster-placeholder.png"; }}
-                        />
-                      </div>
-                      <div className="p-2">
-                        <div className="text-sm font-medium truncate">{m.title_fr || m.title_original}</div>
-                        <div className="text-xs text-gray-500 mt-1">{m.release_date ? new Date(m.release_date).getFullYear() : ""}</div>
-                      </div>
-                    </Link>
+                  <article key={m.id} className="flex-shrink-0 w-40  bg-white rounded-lg shadow-sm overflow-hidden">
+                    <Movie movie={m} />
                   </article>
                 ))}
               </div>
