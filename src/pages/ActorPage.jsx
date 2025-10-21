@@ -1,12 +1,11 @@
-// src/pages/Actors.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api";
 import Header from "./Header";
 import Movie from "./Movie";
 
-export default function ActorsPage() {
-  const { id } = useParams();
+export default function ActorPage() {
+  const { id } = useParams(); // actor id
   const [user, setUser] = useState(null);
   const [actor, setActor] = useState(null);
   const [movies, setMovies] = useState([]);
@@ -17,42 +16,43 @@ export default function ActorsPage() {
   useEffect(() => {
     if (!id) return;
 
-    async function fetchActor() {
-      setLoadingActor(true);
+    async function fetchUser() {
       try {
-        const res = await api.get(`/api/movies/${id}/actors/`);
-        // console.log("fetchActor res:", res.data);
-
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          // On prend le premier acteur de la liste
-          const first = res.data[0];
-          const actorObj = first.actor || first; // selon ta structure
-          setActor(actorObj);
-        } else {
-          setActor(null);
-          setError("Aucun acteur trouvé pour ce film.");
-        }
-      } catch (err) {
-        console.error("fetchActor error", err);
-        setError("Impossible de charger l'acteur.");
-      } finally {
-        setLoadingActor(false);
+        const res = await api.get("/api/user/me/");
+        setUser(res.data);
+      } catch {
+        setUser(null);
       }
     }
 
-    async function fetchMovies() {
+    async function fetchActorAndMovies() {
+      setLoadingActor(true);
       setLoadingMovies(true);
+      setError(null);
+
       try {
-        const res = await api.get(`/api/actors/${id}/movies/`);
-        // console.log("fetchMovies res:", res.data);
-        setMovies(Array.isArray(res.data) ? res.data : res.data.results || []);
+        const resActor = await api.get(`/api/actors/${id}/`);
+        setActor(resActor.data);
       } catch (err) {
-        console.warn("fetchMovies failed, trying fallback", err);
+        console.error("fetch actor failed", err);
+        setError("Impossible de charger l'acteur.");
+        setLoadingActor(false);
+        setLoadingMovies(false);
+        return;
+      } finally {
+        setLoadingActor(false);
+      }
+
+      try {
+        const resMovies = await api.get(`/api/actors/${id}/movies/`);
+        setMovies(Array.isArray(resMovies.data) ? resMovies.data : resMovies.data.results || []);
+      } catch (err) {
+        console.warn("fetch actor movies failed, fallback to /api/movies/?actor=", err);
         try {
           const res2 = await api.get(`/api/movies/?actor=${id}`);
           setMovies(Array.isArray(res2.data) ? res2.data : res2.data.results || []);
         } catch (err2) {
-          console.error("fetchMovies fallback failed", err2);
+          console.error("fallback movies failed", err2);
           setMovies([]);
         }
       } finally {
@@ -60,18 +60,8 @@ export default function ActorsPage() {
       }
     }
 
-    async function fetchName() {
-      try {
-        const res = await api.get("/api/user/me/");
-        setUser(res.data);
-      } catch (err) {
-        setUser(null);
-      }
-    }
-
-    fetchActor();
-    fetchMovies();
-    fetchName();
+    fetchUser();
+    fetchActorAndMovies();
   }, [id]);
 
   if (loadingActor) return <div className="p-6">Chargement de l'acteur…</div>;
@@ -127,7 +117,20 @@ export default function ActorsPage() {
               <div className="flex gap-4 pb-3 px-1">
                 {movies.map((m) => (
                   <article key={m.id} className="flex-shrink-0 w-40 bg-white rounded-lg shadow-sm overflow-hidden">
-                    <Movie movie={m} />
+                    <Link to={`/movies/${m.id}`}>
+                      <div className="w-full h-56 bg-gray-100">
+                        <img
+                          src={m.poster || m.poster_url || "/images/poster-placeholder.png"}
+                          alt={m.title_fr || m.title_original}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.currentTarget.src = "/images/poster-placeholder.png"; }}
+                        />
+                      </div>
+                      <div className="p-2">
+                        <div className="text-sm font-medium truncate">{m.title_fr || m.title_original}</div>
+                        <div className="text-xs text-gray-500 mt-1">{m.release_date ? new Date(m.release_date).getFullYear() : ""}</div>
+                      </div>
+                    </Link>
                   </article>
                 ))}
               </div>

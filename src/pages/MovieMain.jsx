@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ActorsDetails from "./Actors";
+import ActorsDetails from "./ActorPage";
 import { Link } from "react-router-dom";
 
 /**
