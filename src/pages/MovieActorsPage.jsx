@@ -31,13 +31,13 @@ export default function MovieActorsPage() {
         const res = await api.get(`/api/movies/${id}/actors/`);
         setCast(Array.isArray(res.data) ? res.data : res.data.results || []);
 
-        // optionnel : charge aussi le film pour affichage (titre / affiche)
-        try {
-          const movieRes = await api.get(`/api/movies/${id}/`);
-          setMovie(movieRes.data);
-        } catch {
-          setMovie(null);
-        }
+        // // optionnel : charge aussi le film pour affichage (titre / affiche)
+        // try {
+        //   const movieRes = await api.get(`/api/movies/${id}/`);
+        //   setMovie(movieRes.data);
+        // } catch {
+        //   setMovie(null);
+        // }
       } catch (err) {
         console.error("fetch cast error", err);
         setError("Impossible de charger la distribution du film.");
