@@ -85,6 +85,7 @@ export default function MoviePage() {
   async function handleRate(movieId, rating) {
     try {
       await api.post(`/api/movies/${movieId}/rate/`, { score: rating });
+      await fetchComments();
       await fetchMovie();
       
     } catch (err) {
