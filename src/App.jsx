@@ -12,6 +12,7 @@ import MoviePage from "./pages/MoviePage"
 import ProtectedRoute from "./components/ProtectedRoute"
 import NotFound from "./pages/NotFound"
 import Logout from "./pages/Logout"
+import SearchPage from "./pages/SearchPage"
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/movies/:id" element={<MoviePage />} />
         <Route path="/movies/:id/actors" element={<MovieActorsPage />} />
         <Route path="/actors/:id" element={<ActorPage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="*" element={<NotFound />} />
 
       </Routes>
