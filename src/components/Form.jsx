@@ -84,6 +84,14 @@ function Form({ route, method }) {
         >
           {loading ? "Chargement..." : name}
         </button>
+        {/* Bloc d’avertissement Render */}
+        <div className="mt-6 text-center px-4">
+          <p className="text-sm text-gray-700 bg-gray-100 rounded-lg p-3 shadow-sm inline-block max-w-md">
+            Le backend est hébergé sur un compte <strong>Render gratuit</strong>.<br />
+            Merci de votre patience 🙏 : le premier chargement peut prendre <strong>30 à 60 secondes </strong> 
+            avant que l’inscription ou la connexion soit pleinement active.
+          </p>
+        </div>
 
         <div className="auth-toggle">
           {isLogin ? (
